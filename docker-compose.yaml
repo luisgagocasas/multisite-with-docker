@@ -1,0 +1,112 @@
+version: '3.7'
+services:
+  ## SERVICES
+  nginx-proxy:
+    image: jwilder/nginx-proxy
+    container_name: nginx-proxy
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - ./config/htpasswd:/etc/nginx/htpasswd/v2.arcux.local:ro
+      - ./config/htpasswd:/etc/nginx/htpasswd/v3.arcux.local:ro
+      - ./config/htpasswd:/etc/nginx/htpasswd/v4.arcux.local:ro
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpMyadmin
+    links:
+      - mysqlone
+      - mysqltwo
+    environment:
+      VIRTUAL_HOST: v2.arcux.local
+      PMA_VERBOSES: mysqlone,mysqltwo
+      UPLOAD_LIMIT: 1280M
+      PMA_ARBITRARY: 1
+
+  netdata:
+    image: netdata/netdata
+    restart: always
+    container_name: netdata
+    hostname: v3.arcux.local
+    cap_add:
+      - SYS_PTRACE
+    security_opt:
+      - apparmor:unconfined
+    volumes:
+      - ./config/netdata.conf:/etc/netdata/netdata-etc/claim.d/health_alarm_notify.conf
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - VIRTUAL_HOST=v3.arcux.local
+
+  mailhog:
+    image: mailhog/mailhog
+    container_name: mail
+    environment:
+      VIRTUAL_HOST: v4.arcux.local
+      VIRTUAL_PORT: 8025
+    expose:
+      - "1025"
+
+  ## SITES
+  webone:
+    image: nginx:alpine
+    container_name: webone
+    restart: always
+    volumes:
+      - ./web1/nginx:/etc/nginx/conf.d:ro
+      - ./web1/public:/var/www/html:ro
+    depends_on:
+      - phpone
+      - mysqlone
+    environment:
+      VIRTUAL_HOST: arcux.local
+
+  phpone:
+    image: nanoninja/php-fpm:7.3.10
+    container_name: phpone
+    restart: always
+    volumes:
+      - ./web1/public:/var/www/html
+
+  mysqlone:
+    image: mysql:8.0.13
+    container_name: mysqlone
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_HOST: mysqlone
+      MYSQL_DATABASE: wordpress
+      MYSQL_ROOT_PASSWORD: sunway
+    volumes:
+      - ./web1/mysql:/var/lib/mysql
+
+  webtwo:
+    image: nginx:alpine
+    container_name: webtwo
+    restart: always
+    volumes:
+      - ./web2/nginx:/etc/nginx/conf.d:ro
+      - ./web2/public:/var/www/html:ro
+    depends_on:
+      - phptwo
+    environment:
+      VIRTUAL_HOST: v1.arcux.local
+
+  phptwo:
+    image: nanoninja/php-fpm:7.3.10
+    container_name: phptwo
+    restart: always
+    volumes:
+      - ./web2/public:/var/www/html
+
+  mysqltwo:
+    image: mysql:8.0.13
+    container_name: mysqltwo
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_HOST: mysqltwo
+      MYSQL_DATABASE: wordpress
+      MYSQL_ROOT_PASSWORD: 1989
+    volumes:
+      - ./web2/mysql:/var/lib/mysql
