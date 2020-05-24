@@ -71,13 +71,13 @@ services:
       - ./web1/public:/var/www/html
 
   mysqlone:
-    image: mysql:8.0.13
+    image: mysql:8.0.20
     container_name: mysqlone
     command: --default-authentication-plugin=mysql_native_password
     environment:
       MYSQL_HOST: mysqlone
-      MYSQL_DATABASE: wordpress
-      MYSQL_ROOT_PASSWORD: sunway
+      MYSQL_DATABASE: hola
+      MYSQL_ROOT_PASSWORD: 123456
     volumes:
       - ./web1/mysql:/var/lib/mysql
 
@@ -90,6 +90,7 @@ services:
       - ./web2/public:/var/www/html:ro
     depends_on:
       - phptwo
+      - mysqltwo
     environment:
       VIRTUAL_HOST: v1.arcux.local
 
@@ -101,12 +102,12 @@ services:
       - ./web2/public:/var/www/html
 
   mysqltwo:
-    image: mysql:8.0.13
+    image: mysql:8.0.20
     container_name: mysqltwo
     command: --default-authentication-plugin=mysql_native_password
     environment:
       MYSQL_HOST: mysqltwo
-      MYSQL_DATABASE: wordpress
-      MYSQL_ROOT_PASSWORD: 1989
+      MYSQL_DATABASE: chau
+      MYSQL_ROOT_PASSWORD: 123456
     volumes:
       - ./web2/mysql:/var/lib/mysql

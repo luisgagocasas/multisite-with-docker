@@ -1,5 +1,5 @@
 <?php
-$enlace = mysqli_connect("mysqltwo", "root", "1989", "wordpress");
+$enlace = mysqli_connect("mysqltwo", "root", "123456", "chau");
 
 if (!$enlace) {
     echo "Error: No se pudo conectar a MySQL." . PHP_EOL;
