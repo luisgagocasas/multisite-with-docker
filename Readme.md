@@ -12,5 +12,8 @@
 > docker-compose up -d
 - UP services
 
+> docker-compose down
+- DOWN services
+
 > ./clear.sh
-- STOP services and remove data of services
+- STOP services and Remove data of services
